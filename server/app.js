@@ -5,7 +5,7 @@ const fs = require('fs');
 const app = express();
 app.use(bodyParser.json());
 
-const port = 80;
+const port = 8080;
 
 app.get('/', (req, res) => res.send('Hello World!'));
 app.put('/upload', function(req, res) {
@@ -13,7 +13,7 @@ app.put('/upload', function(req, res) {
 	console.log("Time: " + req.body.time);
 	console.log("Lat: " + req.body.lat);
 	console.log("Long: " + req.body.long);
-	var filename = "./meteor.jpg";
+	var filename = req.body.time + "-" + req.body.lat + "-" + req.body.long + ".jpg";
 	fs.writeFile(filename, buf, (err) => {
 		if (err) throw err;
 		console.log(`The file has been saved as ${filename} `);
