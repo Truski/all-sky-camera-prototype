@@ -4,13 +4,18 @@
 import requests
 import time
 import base64
+import json
 from io import BytesIO
 from time import sleep
 from picamera import PiCamera
 
-server = 'localhost'
-port = '80'
-endpoint = 'upload'
+configfile = open('config.json')
+cfg = json.load(configfile)
+
+
+server = cfg['server']
+port = cfg['port']
+endpoint = cfg['endpoint']
 
 #### 1. Function definitions
 #########################################
