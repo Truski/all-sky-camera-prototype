@@ -1,5 +1,9 @@
 {
 	"url": "truskilol.com",
 	"port": 8080,
+	
+	"longtitude": 1.55454654,
+	"latitude": 1.66565656,
+
 	"codes": [5, 9, 73]
 }

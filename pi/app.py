@@ -2,29 +2,39 @@
 #########################################
 
 import requests
-import time
 import base64
 import json
 from io import BytesIO
-from time import sleep
+from time import sleep,time
 from picamera import PiCamera
 
 configfile = open('config.json')
 cfg = json.load(configfile)
 
-
 server = cfg['server']
 port = cfg['port']
 endpoint = cfg['endpoint']
+device_name = cfg['name']
+
+camera = PiCamera()
+
+camera.resolution = ''
+
+camera.framerate = 1
+camera.awb_mode = 'off'
+camera.iso = 800
+
+sleep(30)
+
+camera.exposure_mode = 'off'
+
+
 
 #### 1. Function definitions
 #########################################
 
-def take_image():
-    # Take an image, save it to stream 
-    my_stream = BytesIO()
-    camera = PiCamera()
-    camera.capture(my_stream, 'jpeg')
+def take_image(name): 
+    camera.capture(name+".jpg")
 
 def translate_image():
     # Takes stream jpeg and converts it to base64
@@ -35,7 +45,8 @@ def translate_image():
 #########################################
 
 while(True):
-    # Take image
+    file_name = str(device_name) + str(time)
+    take_image(file_name)
     # Translate image
     # Send image
 
@@ -46,7 +57,7 @@ file = open('images/meteor.jpg', 'rb')
 
 jpeg_text = base64.b64encode(file.read())
 data = {
-	'time': time.time(),
+	'time': time(),
 	'lat': ,
 	'long': -21.311,
 	'image': str(jpeg_text)[1:]
