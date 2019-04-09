@@ -8,6 +8,8 @@ from io import BytesIO
 from time import sleep,time
 from picamera import PiCamera
 
+from astral import Location, Astral
+
 configfile = open('config.json')
 cfg = json.load(configfile)
 
@@ -27,6 +29,17 @@ camera.iso = 800
 sleep(30)
 
 camera.exposure_mode = 'off'
+
+l = Location()
+
+l.name = 'current'
+l.region = 'region'
+l.latitude = cfg['latitude']
+l.longitude = cfg['longitude']
+l.timezone = 'America/Chicago'
+l.elevation = cdf['elevation']
+l.sun()
+
 
 
 
