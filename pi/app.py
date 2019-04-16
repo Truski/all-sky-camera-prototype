@@ -5,11 +5,9 @@ import requests
 import base64
 import json
 import os
-from io import BytesIO
 from time import sleep,time
 from picamera import PiCamera
-
-from astral import Location, Astral
+from astral import Location, Astralimport serial
 
 def lcm(x, y, z):
     gcd2 = gcd(y, z)
@@ -49,7 +47,9 @@ camera.framerate = 1
 camera.awb_mode = 'off'
 camera.iso = 800
 
-sleep(30) # Why?
+ser = serial.Serial("/dev/ttyACM0",9600)
+
+sleep(30)
 
 camera.exposure_mode = 'off'
 
@@ -98,8 +98,7 @@ def convert_image_to_base64(filename):
 def send_image(img_data, current_time):
     data = {
 	'time': current_time,
-	'image': str(img_data)[1:],
-	'device': device_name
+	'image': str(img_data)[1:]
     }
     print(data)
     make_request(image_url, 
@@ -111,14 +110,16 @@ def delete_image(filename):
 #### b) Raw Data Processing
 
 def submit_raw_data():
-    data = capture_raw_data()
+    data = {
+	'raw_data': capture_raw_data()
+    }
     send_raw(data)
 
 def capture_raw_data():
-    # TODO: Yogi and Koushik
+    return ser.readline()
 
 def send_raw(data):
-    requests.put(raw_url, data)
+    make_request(raw_url, "post", data);
 
 #### c) Status Upload
 
