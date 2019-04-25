@@ -1,9 +1,18 @@
 {
-	"url": "truskilol.com",
-	"port": 8080,
-	
-	"longtitude": 1.55454654,
+	"longitude": 1.55454654,
 	"latitude": 1.66565656,
+	"elevation": 0,
 
-	"codes": [5, 9, 73]
+	"codes": [5, 9, 73],
+	"server": "https://kijr6bx4ba.execute-api.us-east-2.amazonaws.com",
+	"port": 443,
+	"api_key": "qc35CeS4dN5X44xUlaunw9gcYB607m534P0646jv",
+	"image_endpoint": "dev/device/imgdata",
+	"raw_endpoint" : "dev/device/data",
+	"status_endpoint" : "dev/device/status",
+	"config_endpoint" : "dev/device/config",
+	"device_name" : "prototype",
+	"raw_frequency" : 60,
+	"img_frequency": 10,
+	"sts_frequency": 600
 }

@@ -1,13 +1,22 @@
 #### 0. Imports, initiatilizing variables
 #########################################
 
+from time import sleep,time
+import sys
+
+print("Brolo")
+sys.stdout.flush()
+
+sleep(120)
+
 import requests
 import base64
 import json
 import os
-from time import sleep,time
+from math import gcd
 from picamera import PiCamera
-from astral import Location, Astralimport serial
+from astral import Location, Astral
+import serial
 
 def lcm(x, y, z):
     gcd2 = gcd(y, z)
@@ -23,33 +32,34 @@ cfg = json.load(configfile)
 
 server = cfg['server']
 port = cfg['port']
-aws_key = cfg['aws_key']
+api_key = cfg['api_key']
 image_endpoint = cfg['image_endpoint']
 raw_endpoint = cfg['raw_endpoint']
 status_endpoint = cfg['status_endpoint']
 config_endpoint = cfg['config_endpoint']
 
-device_name = cfg['name']
+device_name = cfg['device_name']
 
 raw_frequency = cfg['raw_frequency']
 img_frequency = cfg['img_frequency']
 sts_frequency = cfg['sts_frequency']
 max_frequency = lcm(raw_frequency, img_frequency, sts_frequency)
 
-image_url = f"http://{server}:{port}/{image_endpoint}"
-raw_url = f"http://{server}:{port}/{raw_endpoint}"
-status_url = f"http://{server}:{port}/{status_endpoint}"
-config_url = f"http://{server}:{port}/{config_enpoint}"
+image_url = f"{server}:{port}/{image_endpoint}"
+raw_url = f"{server}:{port}/{raw_endpoint}"
+status_url = f"{server}:{port}/{status_endpoint}"
+config_url = f"{server}:{port}/{config_endpoint}"
+
+print("Image url: " + image_url)
+print("Api key: " + api_key)
 
 camera = PiCamera()
-camera.resolution = ''
+camera.resolution = '2592x1944'
 camera.framerate = 1
-camera.awb_mode = 'off'
+#camera.awb_mode = 'off'
 camera.iso = 800
 
-ser = serial.Serial("/dev/ttyACM0",9600)
-
-sleep(30)
+# ser = serial.Serial("/dev/ttyACM0",9600)
 
 camera.exposure_mode = 'off'
 
@@ -60,7 +70,7 @@ l.region = 'region'
 l.latitude = cfg['latitude']
 l.longitude = cfg['longitude']
 l.timezone = 'America/Chicago'
-l.elevation = cdf['elevation']
+l.elevation = cfg['elevation']
 l.sun()
 
 record_count = 0
@@ -71,10 +81,13 @@ record_count = 0
 #### _) Networking
 
 def make_request(url, req_type, data):
+    r = ""
     if req_type == "post":
-	requests.post(url, json=data, headers="x-api-key": aws_key)
+        r = requests.post(url, json=data, headers={"x-api-key": api_key, "content-type": "application/json"})
     elif req_type == "get":
-	requests.get(url, json=data, headers="x-api-key": aws_key)
+        r = requests.get(url, json=data, headers={"x-api-key": api_key, "content-type": "application/json"})
+    print(r)
+    print(r.text)
 
 #### a) Image Processing
 
@@ -87,23 +100,18 @@ def submit_img_data():
     delete_image(file_name)
 
 def take_image(filename): 
-    camera.capture(name)
+    camera.capture(filename)
 
 def convert_image_to_base64(filename):
     file = open(filename, 'rb')
-    jpeg_in_base64 = base64.b64encode(file)
-    close(file)
+    jpeg_in_base64 = base64.b64encode(file.read())
+    file.close()
     return jpeg_in_base64
     
 def send_image(img_data, current_time):
-    data = {
-	'time': current_time,
-	'image': str(img_data)[1:]
-    }
-    print(data)
-    make_request(image_url, 
-    r = requests.put(image_url, json=data)
-    
+    data = { 'time': current_time, 'img': str(img_data)[1:] }
+    make_request(image_url, "post", data)
+
 def delete_image(filename):
     os.remove(filename)
 
@@ -111,42 +119,35 @@ def delete_image(filename):
 
 def submit_raw_data():
     data = {
-	'raw_data': capture_raw_data()
+	'raw_data': capture_raw_data()	
     }
     send_raw(data)
 
 def capture_raw_data():
-    return ser.readline()
+    #ser.flush()
+    #return ser.readline()
+    return "this is some data dude"
 
 def send_raw(data):
-    make_request(raw_url, "post", data);
-
-#### c) Status Upload
-
-def submit_status():
-    # TODO: Aziz
+    make_request(raw_url, "post", data)
 
 #### 2. Primary while loop
 #########################################
 
-while(True):
+while True:
     sleep(1)
-    
-    print("Time is" + str(record_count)
-    
     if record_count % raw_frequency == 0:
-	print("Submitting raw data")
-	submit_raw_data()
+        print("Submitting raw data")
+        submit_raw_data()
 	
     if record_count % img_frequency == 0:
-	print("Submitting img data")
-	#submit_img_data()
+        print("Submitting img data")
+        submit_img_data()
     
     if record_count % sts_frequency == 0:
-	print("Submitting status")
-	submit_status()
+        print("Submitting status")
 	
     record_count += 1
     
     if record_count == max_frequency:
-	record_count = 0
+        record_count = 0
